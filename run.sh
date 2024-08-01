@@ -171,15 +171,16 @@ for pid in "${job_pids[@]}"; do
     wait $pid
 done
 
-rm job_metadata.sh
+echo "Do not remove job_metadata.sh yet!"
+#rm job_metadata.sh
 
 echo "All child processes have completed."
 
 # If $TILE_OUTPUTS is true, make a POST request to the tiling service API
-if $TILE_OUTPUTS; then
-    echo "TILE_OUTPUTS set to true. Sending API request to tile outputs..."
+#if $TILE_OUTPUTS; then
+#    echo "TILE_OUTPUTS set to true. Sending API request to tile outputs..."
 
-    curl http://terry13.idm.orionspace.com:4100/ping -H "Accept: application/json"
+#    curl http://terry13.idm.orionspace.com:4100/ping -H "Accept: application/json"
 
     # curl -X POST -H "Content-Type: application/json" -d \
     # '{ 
@@ -196,16 +197,16 @@ if $TILE_OUTPUTS; then
     # }' \
     # http://terry13.idm.orionspace.com:4300/tiler/3dtiles/1
 
-fi
+#fi
 
 
 # Test - Set up certs for gitserver (pulling tiler image)
-sudo mkdir -p /etc/docker/certs.d/gitserver.idm.orionspace.com:5050
-openssl s_client -showcerts -connect gitserver.idm.orionspace.com:5050 \
-</dev/null 2>/dev/null|openssl x509 -outform PEM > /etc/docker/certs.d/gitserver.idm.orionspace.com:5050/ca.crt
+#sudo mkdir -p /etc/docker/certs.d/gitserver.idm.orionspace.com:5050
+#openssl s_client -showcerts -connect gitserver.idm.orionspace.com:5050 \
+#</dev/null 2>/dev/null|openssl x509 -outform PEM > /etc/docker/certs.d/gitserver.idm.orionspace.com:5050/ca.crt
 
 # echo "$MY_PASSWORD" | docker login --username foo --password-stdin
 
-sudo docker login gitserver.idm.orionspace.com:5050
+#sudo docker login gitserver.idm.orionspace.com:5050
 
 echo "Done!"
