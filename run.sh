@@ -93,7 +93,7 @@ singularity exec TIEGCM.sif /opt/miniconda3/bin/python script/generate_F107_samp
 export RUNDIR=${TGCMMODEL}/run
 
 # Create directory (job-id) in the s3 bucket for outputs
-cd /storage/model-outputs/tiegcm/tiegcm2.0/ens
+cd /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens
 mkdir ${PW_JOB_NUM}
 cd $HOME
 
@@ -131,11 +131,11 @@ mpirun -n 4 singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tieg
 
 echo "Export outputs to s3 bucket..."
 
-cd /storage/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}
+cd /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}
 mkdir -p ${mem}
 cd ${RUNDIR}/${PW_JOB_NUM}/${mem}
 
-rsync -r ${RUNDIR}/${PW_JOB_NUM}/${mem}/. /storage/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/${mem}
+rsync -r ${RUNDIR}/${PW_JOB_NUM}/${mem}/. /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/${mem}
 
 # Check if the export succeeded
 if [ $? -eq 0 ]; then
