@@ -21,8 +21,9 @@ if [ -f "$image_sif" ]; then
     echo "Using cached image.sif..."
 else
     echo "Downloading image.sif from S3..."
-    cp /storage/model-images/tiegcm/TIEGCM.sif .
-    
+    #cp /storage/model-images/tiegcm/TIEGCM.sif .
+    cp /tiegcm/model-images-tiegcm/TIEGCM.sif .
+
     # Check if the download was successful
     if [ $? -eq 0 ]; then
         echo "Downloaded image.sif successfully."
@@ -39,7 +40,9 @@ if [ -d "$data_dir" ]; then
   echo "$data_dir exists."
 else
     echo  Copying tar and uncompressing...
-    cp /storage/model-workflows/tiegcm/tiegcm2.0/data/tiegcm2.0_res5.0_data.tar.gz .
+    #cp /storage/model-workflows/tiegcm/tiegcm2.0/data/tiegcm2.0_res5.0_data.tar.gz .
+    cp /tiegcm/model-workflows-tiegcm2.0/data/tiegcm2.0_res5.0_data.tar.gz .
+
     tar -zxf tiegcm2.0_res5.0_data.tar.gz
     
     # Check if the uncompression was successful
@@ -57,7 +60,8 @@ if [ -d "$script_dir" ]; then
   echo "$script_dir exists."
 else
     echo  Copying tar and uncompressing...
-    cp -r /storage/model-workflows/tiegcm/tiegcm2.0/script .
+    #cp -r /storage/model-workflows/tiegcm/tiegcm2.0/script .
+    cp -r /tiegcm/model-workflows-tiegcm2.0/script .
 
     # TODO: Fix this workaround
     touch script/truncated_samples_F107.txt

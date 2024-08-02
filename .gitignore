@@ -160,3 +160,12 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# TIEGCM container and run dirs
+TIEGCM.sif
+tiegcm2.0_res5.0_data.tar.gz
+tiegcm_res5.0_data/
+run/
+script/
+truncated_samples_F107.txt
+24/
