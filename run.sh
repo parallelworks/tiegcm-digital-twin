@@ -5,9 +5,11 @@ source job_metadata.sh
 
 echo "PWD: $PWD"
 echo "N_NODES: $N_NODES"
+echo "N_ENS: $N_ENS"
 echo "PW_JOB_ID: $PW_JOB_ID"
 echo "PW_JOB_NUM: $PW_JOB_NUM"
 echo "TILE_OUTPUTS: $TILE_OUTPUTS" 
+echo "PARTITION: $PARTITION"
 
 echo;pwd;echo;hostname;echo;ls;echo;
 image_sif="TIEGCM.sif"
@@ -82,7 +84,7 @@ export TGCMDATA=${TGCMMODEL}/tiegcm_res5.0_data
 export SINGULARITYENV_LD_LIBRARY_PATH=/opt/miniconda3/lib
 
 # Choose ensemble size and other parameters for F10.7 samples
-ens_size=$N_NODES
+ens_size=$N_ENS
 mean=75
 std_dev=1
 range_limit=5
@@ -114,20 +116,30 @@ do
 if command -v sbatch &> /dev/null ; then
     echo "sbatch command found, submit batch job" 
 
+# Key changes here:
+# Removed --exclusive to allow for testing packing multiple runs on the same node
+# Added --cpus-per-task=1 to explicitly tell the scheduler how many CPUs it needs
+#    (this is the default anyway, but useful here in case we test other configs)
+# Added --partition to allow pushing runs to different partitions.
+# Insert time command before mpirun to get run time specifically for the compute,
+# independent of the data staging in, node spin up, and data staging out. This
+# time command output will end up in default slurm output log - if this is not
+# configured in #SBATCH, then it will be in the run directory under slurm-<jobid>.out.
 cat <<EOF >run.sh
 #!/bin/bash
-#SBATCH --exclusive
 #SBATCH --job-name ${mem}
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
+#SBATCH --cpus-per-task=1
 #SBATCH --time=00:15:00 # Max execution time
+#SBATCH --partition=$PARTITION
 
 echo "Hostname:"
 hostname
 
 export SINGULARITYENV_LD_LIBRARY_PATH=/opt/miniconda3/lib
 
-mpirun -n 4 singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out
+time mpirun -n 4 singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out
 
 echo "Export outputs to s3 bucket..."
 
