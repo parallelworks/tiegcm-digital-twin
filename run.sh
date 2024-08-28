@@ -10,8 +10,18 @@ echo "PW_JOB_ID: $PW_JOB_ID"
 echo "PW_JOB_NUM: $PW_JOB_NUM"
 echo "TILE_OUTPUTS: $TILE_OUTPUTS" 
 echo "PARTITION: $PARTITION"
+echo "WORK_DIR: $WORK_DIR"
 
+echo "sbatch script is starting here:"
 echo;pwd;echo;hostname;echo;ls;echo;
+
+echo "Change to WORK_DIR and check again:"
+# Create WORK_DIR if not already present.
+# Command is silent if WORK_DIR exists.
+mkdir -pv $WORK_DIR
+cd $WORK_DIR
+echo;pwd;echo;hostname;echo;ls;echo;
+
 image_sif="TIEGCM.sif"
 HOME=$PWD
 job_pids=() # Array to store PIDs of local background jobs
@@ -96,7 +106,7 @@ export RUNDIR=${TGCMMODEL}/run
 
 # Create directory (job-id) in the s3 bucket for outputs
 cd /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens
-mkdir ${PW_JOB_NUM}
+mkdir -pv ${PW_JOB_NUM}
 cd $HOME
 
 # Set up tigecm ensemble runs
@@ -139,6 +149,8 @@ hostname
 
 export SINGULARITYENV_LD_LIBRARY_PATH=/opt/miniconda3/lib
 
+echo "Run ensemble member..."
+
 time mpirun -n 4 singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out
 
 echo "Export outputs to s3 bucket..."
@@ -147,7 +159,7 @@ cd /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}
 mkdir -p ${mem}
 cd ${RUNDIR}/${PW_JOB_NUM}/${mem}
 
-rsync -r ${RUNDIR}/${PW_JOB_NUM}/${mem}/. /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/${mem}
+time rsync -r ${RUNDIR}/${PW_JOB_NUM}/${mem}/. /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/${mem}
 
 # Check if the export succeeded
 if [ $? -eq 0 ]; then
@@ -173,7 +185,7 @@ else
     job_pids+=($!) # Capture PID of the background job
 fi
 
-done
+done # End of ensemble member launch loop
 
 # Wait for SLURM jobs to finish
 for job_id in "${sbatch_job_ids[@]}"; do
