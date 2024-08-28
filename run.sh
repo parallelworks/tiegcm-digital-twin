@@ -173,7 +173,7 @@ cd /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}
 mkdir -p ${mem}
 cd ${RUNDIR}/${PW_JOB_NUM}/${mem}
 
-time rsync -r ${RUNDIR}/${PW_JOB_NUM}/${mem}/. /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/${mem}
+rsync -r ${RUNDIR}/${PW_JOB_NUM}/${mem}/. /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/${mem}
 
 # Check if the export succeeded
 if [ $? -eq 0 ]; then
