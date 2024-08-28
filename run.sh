@@ -23,7 +23,10 @@ cd $WORK_DIR
 echo;pwd;echo;hostname;echo;ls;echo;
 
 image_sif="TIEGCM.sif"
-HOME=$PWD
+
+# I don't think this is being used and it confuses me.
+#HOME=$PWD
+
 job_pids=() # Array to store PIDs of local background jobs
 sbatch_job_ids=() # Array to store SLURM job IDs
 
@@ -107,7 +110,11 @@ export RUNDIR=${TGCMMODEL}/run
 # Create directory (job-id) in the s3 bucket for outputs
 cd /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens
 mkdir -pv ${PW_JOB_NUM}
-cd $HOME
+
+# I don't think this is being used
+# (loop below uses cd to change dirs
+# very quickly).
+#cd $HOME
 
 # Set up tigecm ensemble runs
 for (( i=1; i<=$ens_size; i++))
@@ -150,8 +157,15 @@ hostname
 export SINGULARITYENV_LD_LIBRARY_PATH=/opt/miniconda3/lib
 
 echo "Run ensemble member..."
-
-time mpirun -n 4 singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out
+# Originally, it was assumed that this container
+# ran somewhere under $HOME whose absolute path 
+# is the same in the container and out of the 
+# container and Singularity autobinds $HOME on
+# startup of the container. When choosing other
+# directories not under $HOME (or the limited
+# subset of autobound dirs), however, we need to 
+# explicitly include the --bind directive.
+time mpirun -n 4 singularity exec --bind ${TGCMMODEL} ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out
 
 echo "Export outputs to s3 bucket..."
 
@@ -181,7 +195,7 @@ EOF
 
 else
     echo "sbatch command not found, run it locally."
-    time mpirun -n 4 singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out &
+    time mpirun -n 4 singularity exec --bind ${TGCMMODEL} ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out &
     job_pids+=($!) # Capture PID of the background job
 fi
 
