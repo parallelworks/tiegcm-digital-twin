@@ -5,7 +5,9 @@ export PW_JOB_ID=42
 
 # This setting can be a number or a string
 # This is the main job identifier.
-export PW_JOB_NUM=w_lustre_c5n2x
+export PW_JOB_NUM=hpc6a_hpc6a_w_lustre
+
+# Currently unused. Keep as is for merging later.
 
 # This setting is not used.
 export N_NODES=1
@@ -13,7 +15,7 @@ export N_NODES=1
 # This setting controls the number of
 # ensemble members. run.sh is hardcoded
 # to request 4 tasks per ensemble member.
-export N_ENS=100
+export N_ENS=120
 
 # This setting is not used.
 export TILE_OUTPUTS=False
@@ -25,7 +27,7 @@ export TILE_OUTPUTS=False
 # instance types since I've configured
 # my cluster to have a different instance
 # type on each partition.
-export PARTITION=compute
+export PARTITION=biggest
 
 # Where do we want the model to run?
 # This value can be set to ${PWD} if

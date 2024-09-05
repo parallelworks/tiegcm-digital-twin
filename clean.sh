@@ -7,7 +7,10 @@ source job_metadata.sh
 
 # Remove data copied to bucket from
 # the run specified in the job_metadata.
-rm -vrf /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}
+# In this case, remove only the two netcdf
+# files (the bulk of the data) and leave the
+# log files for diagnosis later.
+rm -vrf /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/mem*/*.nc
 
 # Remove local working directories/container
 cd $WORK_DIR
