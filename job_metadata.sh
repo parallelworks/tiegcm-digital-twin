@@ -5,7 +5,7 @@ export PW_JOB_ID=42
 
 # This setting can be a number or a string
 # This is the main job identifier.
-export PW_JOB_NUM=hpc6a_hpc6a_w_lustre
+export PW_JOB_NUM=hpc6a_hpc6a_w_lustre_t2
 
 # Currently unused. Keep as is for merging later.
 
@@ -35,3 +35,11 @@ export PARTITION=biggest
 # the github repo is cloned.
 # Other paths are possible.
 export WORK_DIR=/lustre/work/
+
+# Where are the results archived?
+# (This parameter *should* be used by
+# run.sh, but this is currently not
+# the case.) Right now, it's only the
+# postprocessing script that uses this.
+export ARCHIVE_DIR=/tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/
+

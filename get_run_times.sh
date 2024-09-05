@@ -1,22 +1,12 @@
 #!/bin/bash
-#==============================
-# Based on the most recent run
-# information, grab the run times
-# of the ensemble members and find
-# the mean and standard deviation.
-#
-# Use GMT math for the mean and std,
-# since we're already using TIEGCM
-# in a container, it's not a big
-# step to pull parallelworks/gmt.
-#===============================
+#=======================
 
-# Get basic information about where
-# the data is
 source job_metadata.sh
 
-# Pull the GMT container
-singularity exec docker://parallelworks/gmt /bin/bash
+# MEAN
+echo "AVG run time (s): " `cat ${ARCHIVE_DIR}/${PW_JOB_NUM}/mem*/slurm-*.out | grep real | awk '{print $2}' | awk -Fm '{print $1*60 + $2}' | gmt gmtmath -Ca STDIN MEAN -Sl =`
 
-# Grab results from the slurm-<jobid>.out files
-# cat mem*/slurm-*.out | grep real | awk {convert columns to seconds} | gmt gmtmath mean ...
+# STD
+echo "STD run time (s): " `cat ${ARCHIVE_DIR}/${PW_JOB_NUM}/mem*/slurm-*.out | grep real | awk '{print $2}' | awk -Fm '{print $1*60 + $2}' | gmt gmtmath -Ca STDIN STD -Sl =`
+
+

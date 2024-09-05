@@ -182,6 +182,9 @@ else
     echo "Failed to export results to the S3 Bucket."
 fi
 
+echo "Writing number of NFS threads to log:"
+cat /etc/sysconfig/nfs | grep NFS.COUNT
+
 now=$(date)
 
 echo "$now"

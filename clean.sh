@@ -10,7 +10,7 @@ source job_metadata.sh
 # In this case, remove only the two netcdf
 # files (the bulk of the data) and leave the
 # log files for diagnosis later.
-rm -vrf /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens/${PW_JOB_NUM}/mem*/*.nc
+rm -vrf ${ARCHIVE_DIR}/${PW_JOB_NUM}/mem*/*.nc
 
 # Remove local working directories/container
 cd $WORK_DIR
