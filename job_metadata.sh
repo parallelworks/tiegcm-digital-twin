@@ -27,7 +27,7 @@ export TILE_OUTPUTS=False
 # instance types since I've configured
 # my cluster to have a different instance
 # type on each partition.
-export PARTITION=compute
+export PARTITION=small
 
 # Where do we want the model to run?
 # This value can be set to ${PWD} if
