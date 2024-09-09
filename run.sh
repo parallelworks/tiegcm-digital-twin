@@ -203,7 +203,7 @@ EOF
 
 else
     echo "sbatch command not found, run it locally."
-    time mpirun -n 4 singularity exec --bind ${TGCMMODEL} ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out &
+    time mpirun -n 4 singularity exec --bind ${TGCMMODEL} --pwd ${RUNDIR}/${PW_JOB_NUM}/${mem} ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out &
     job_pids+=($!) # Capture PID of the background job
 fi
 
