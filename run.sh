@@ -102,7 +102,7 @@ mean=75
 std_dev=1
 range_limit=5
 
-# Generate a truncated normal samples for F10.7
+echo "Generate a truncated normal samples for F10.7"
 singularity exec TIEGCM.sif /opt/miniconda3/bin/python script/generate_F107_samples.py $ens_size $mean $std_dev $range_limit
 
 export RUNDIR=${TGCMMODEL}/run

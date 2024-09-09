@@ -5,7 +5,7 @@ export PW_JOB_ID=42
 
 # This setting can be a number or a string
 # This is the main job identifier.
-export PW_JOB_NUM=hpc6a_hpc6a_w_lustre_t2
+export PW_JOB_NUM=hc44rs_hc44rs_w_lustre_t1
 
 # Currently unused. Keep as is for merging later.
 
@@ -27,7 +27,7 @@ export TILE_OUTPUTS=False
 # instance types since I've configured
 # my cluster to have a different instance
 # type on each partition.
-export PARTITION=biggest
+export PARTITION=compute
 
 # Where do we want the model to run?
 # This value can be set to ${PWD} if
