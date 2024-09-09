@@ -103,18 +103,18 @@ std_dev=1
 range_limit=5
 
 echo "Generate a truncated normal samples for F10.7"
-singularity exec TIEGCM.sif /opt/miniconda3/bin/python script/generate_F107_samples.py $ens_size $mean $std_dev $range_limit
+# Note that some versions of Singularity ASSUME
+# startup in $HOME while others assume startup
+# in $PWD. Need to be explicit with --pwd for 
+# portability. Provide absolute path to running 
+# executable and bind mount it in case.
+singularity exec --bind ${TGCMMODEL} --pwd "$PWD" TIEGCM.sif /opt/miniconda3/bin/python ${TGCMMODEL}/script/generate_F107_samples.py $ens_size $mean $std_dev $range_limit
 
 export RUNDIR=${TGCMMODEL}/run
 
 # Create directory (job-id) in the s3 bucket for outputs
 cd /tiegcm/model-outputs/tiegcm/tiegcm2.0/ens
 mkdir -pv ${PW_JOB_NUM}
-
-# I don't think this is being used
-# (loop below uses cd to change dirs
-# very quickly).
-#cd $HOME
 
 echo "Set up tigecm ensemble runs..."
 for (( i=1; i<=$ens_size; i++))
@@ -125,10 +125,15 @@ do
   cd ${RUNDIR}/${PW_JOB_NUM}/${mem}
 
   /bin/cp -f ${TGCMMODEL}/script/tiegcm_res5.0.inp .
-  /bin/cp -f ${TGCMMODEL}/script/truncated_samples_F107.txt .
+  /bin/cp -f ${TGCMMODEL}/truncated_samples_F107.txt .
   /bin/cp -f ${TGCMMODEL}/script/modify_tgcm_input.py .
 
-  singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/miniconda3/bin/python modify_tgcm_input.py $i
+  # Note that some versions of Singularity assume
+  # startup in $HOME while others assume startup
+  # in $PWD. Need to be explicit with --pwd for 
+  # portability. Using the absolute path from
+  # the cd command above for --pwd.
+  singularity exec --bind ${TGCMMODEL} --pwd ${RUNDIR}/${PW_JOB_NUM}/${mem} ${TGCMMODEL}/TIEGCM.sif /opt/miniconda3/bin/python modify_tgcm_input.py $i
   
 if command -v sbatch &> /dev/null ; then
     echo "sbatch command found, submit batch job" 
@@ -165,7 +170,7 @@ echo "Run ensemble member..."
 # directories not under $HOME (or the limited
 # subset of autobound dirs), however, we need to 
 # explicitly include the --bind directive.
-time mpirun -n 4 singularity exec --bind ${TGCMMODEL} ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out
+time mpirun -n 4 singularity exec --bind ${TGCMMODEL} --pwd ${RUNDIR}/${PW_JOB_NUM}/${mem} ${TGCMMODEL}/TIEGCM.sif /opt/model/tiegcm.exec/tiegcm2.0 tiegcm_res5.0.inp &> tiegcm_res5.0_${mem}.out
 
 echo "Export outputs to s3 bucket..."
 

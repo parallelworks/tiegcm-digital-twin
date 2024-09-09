@@ -5,7 +5,7 @@ export PW_JOB_ID=42
 
 # This setting can be a number or a string
 # This is the main job identifier.
-export PW_JOB_NUM=hc44rs_hc44rs_w_lustre_t1
+export PW_JOB_NUM=test1
 
 # Currently unused. Keep as is for merging later.
 
@@ -15,7 +15,7 @@ export N_NODES=1
 # This setting controls the number of
 # ensemble members. run.sh is hardcoded
 # to request 4 tasks per ensemble member.
-export N_ENS=120
+export N_ENS=4
 
 # This setting is not used.
 export TILE_OUTPUTS=False
