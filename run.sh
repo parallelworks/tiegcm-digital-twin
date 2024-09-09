@@ -116,7 +116,7 @@ mkdir -pv ${PW_JOB_NUM}
 # very quickly).
 #cd $HOME
 
-# Set up tigecm ensemble runs
+echo "Set up tigecm ensemble runs..."
 for (( i=1; i<=$ens_size; i++))
 do
   mem="mem"$(printf "%03d" $i)
@@ -125,7 +125,7 @@ do
   cd ${RUNDIR}/${PW_JOB_NUM}/${mem}
 
   /bin/cp -f ${TGCMMODEL}/script/tiegcm_res5.0.inp .
-  /bin/cp -f ${TGCMMODEL}/truncated_samples_F107.txt .
+  /bin/cp -f ${TGCMMODEL}/script/truncated_samples_F107.txt .
   /bin/cp -f ${TGCMMODEL}/script/modify_tgcm_input.py .
 
   singularity exec ${TGCMMODEL}/TIEGCM.sif /opt/miniconda3/bin/python modify_tgcm_input.py $i
