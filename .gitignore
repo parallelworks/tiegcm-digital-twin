@@ -169,3 +169,9 @@ run/
 script/
 truncated_samples_F107.txt
 24/
+
+# Parsl logs
+runinfo/
+parsl-app-logs/
+parsl_vis.std*
+
