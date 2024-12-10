@@ -174,4 +174,5 @@ truncated_samples_F107.txt
 runinfo/
 parsl-app-logs/
 parsl_vis.std*
+singularity_pull.std*
 
