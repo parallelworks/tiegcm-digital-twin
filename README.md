@@ -1,6 +1,18 @@
 # tiegcm-digital-twin
 Using TIEGCM as a digital twin
 
+## Dependencies
+
+This workflow depends on the following:
+1. the Jupyter notebook or `main.py` workflow in this repo;
+2. the Conda env with Parsl bootstrapped by the notebook/workflow;
+3. TIEGCM Docker container converted to Singularity on-the-fly; and
+4. some initialization and configuration tarballs in a cloud bucket.
+
+The original TIEGCM model is available from http://www.hao.ucar.edu/modeling/tgcm/download.php and is distributed under an academic, non-commercial [license](https://www.hao.ucar.edu/modeling/tgcm/download/files/tiegcmlicense.txt).
+
+5. TIEGCM is launched by mpiexec, so you'll also need OpenMPI or Intel MPI. Please see `install_openmpi.sh` distributed with this repository for an example of OpenMPI installation.
+
 ## Container conversion
 
 The TIEGCM container was provided as a Singularity `.sif`. To convert 
