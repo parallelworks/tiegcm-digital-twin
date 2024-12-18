@@ -3,6 +3,8 @@ import os
 import sys
 from scipy.stats import norm, truncnorm
 from tiegcm_inputs import TGCMInput
+from fetch_indices import get_f107
+from fetch_indices import get_kp_array
 
 def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, 
                             step:int, input_fn:str="tiegcm_res5.0.inp", 
@@ -176,16 +178,16 @@ def perturb_drivers(kp_mean:float, f107_mean:float, f107a:float,
                 else:
                     f.write(line)
 
-def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, kp:float, f107:float, f107a:float):
+def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_HR:int, TIMESTEP:int, kp:float, f107:float, f107a:float):
     # Set options
     #N_ENS = 100
     REL_STD = 0.1
     #JOB_ID = "gannon_storm_ens"
     #WORK_DIR = os.getcwd()
-    TIMESTEP = 60
-    SRC_YR = 2024
-    SRC_DAY = 130
-    SRC_HR = 21
+    #TIMESTEP = 60
+    #SRC_YR = 2024
+    #SRC_DAY = 130
+    #SRC_HR = 21
     run_workdir = f"{WORK_DIR}/run/{JOB_ID}"
 
     # Generate and store relative perturbations for this run
@@ -193,7 +195,7 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, kp:float, f107:float, f107a:f
     relative_perturbations = generate_perturbations(N_ENS, REL_STD, fn=perturb_fn)
 
     # Configure input file    
-    run_date = f"{SRC_YR}_{SRC_DAY}_{SRC_HR:03}"
+    run_date = f"{SRC_YR}_{SRC_DAY:03}_{SRC_HR:03}"
     inp_fn = f"{WORK_DIR}/run/{JOB_ID}/tiegcm_res5.0_{run_date}.inp"
     hr_diff = 0  # hour offset from SRC time, can increment if looping over multiple timesteps
     run_date = configure_tgcm_timestep(SRC_YR, SRC_DAY, SRC_HR, hr_diff, TIMESTEP, inp_fn)
@@ -205,22 +207,69 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, kp:float, f107:float, f107a:f
 if __name__ == '__main__':
     # Check if the correct number of arguments is provided
     print(len(sys.argv))
-    if len(sys.argv) < 6:
+    if len(sys.argv) < 4:
         print("Usage: python perturbed_input_from_indices.py N_ENS WORK_DIR JOB_ID kp f107 f107a")
         sys.exit(1)
-
-    # Read ensemble size and other parameters from command line arguments
+    #==============================================
+    # Read ensemble size and other parameters from 
+    # command line arguments
+    #==============================================
+    # Where and shape
     N_ENS = int(sys.argv[1])
     WORK_DIR = str(sys.argv[2])
     JOB_ID = str(sys.argv[3])
-    kp = float(sys.argv[4])
-    f107 = float(sys.argv[5])
-    f107a = float(sys.argv[6])
     
+    # Date/time info - based on the date string
+    datetime_str=str(sys.argv[4])
+    #SRC_YR = str(sys.argv[4])
+    #SRC_DAY = int(sys.argv[5])
+    #SRC_HR = int(sys.argv[6])
+    
+    # Hardcoded?
+    TIMESTEP = 60
+    
+    # Solar params - computed on the fly below
+    #kp = float(sys.argv[8])
+    #f107 = float(sys.argv[9])
+    #f107a = float(sys.argv[10])
+
+    #==============================================
+    # Date information
+    #==============================================
+    dt = datetime.strptime(datetime_str, '%Y/%m/%d/%H:%M:%S')
+    SRC_YR = int(dt.strftime('%Y'))
+    SRC_DAY = int(dt.strftime('%J'))
+    SRC_HR = int(dt.strftime('%H'))
+    
+    #==============================================
+    # Get solar forcing
+    #==============================================
+    (f107, f107a) = get_f107(dt)
+    kp_array = get_kp_array(dt)
+    # We only want the last value in the Kp array
+    kp=kp_array[-1]
+    
+    #==============================================
     # Create the ensemble directories
+    #==============================================
     for ii in range(1, N_ENS+1):
         my_dir=f"{WORK_DIR}/run/{JOB_ID}/mem{(ii):03}"
         os.makedirs(my_dir, exist_ok = False)
     
+    #==============================================
     # Launch main function that calls other functions
-    write_inp(N_ENS=N_ENS, WORK_DIR=WORK_DIR, JOB_ID=JOB_ID, kp=kp, f107=f107, f107a=f107a)
+    #==============================================
+    write_inp(
+        N_ENS=N_ENS, 
+        WORK_DIR=WORK_DIR, 
+        JOB_ID=JOB_ID, 
+        SRC_YR = SRC_YR,
+        SRC_DAY = SRC_DAY,
+        SRC_HR = SRC_HR,
+        TIMESTEP = TIMESTEP,
+        kp=kp, 
+        f107=f107, 
+        f107a=f107a)
+    
+    src_str=f"{SRC_YR}_{SRC_DAY}_{SRC_HR:03}"
+    return src_str
