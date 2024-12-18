@@ -175,4 +175,5 @@ runinfo/
 parsl-app-logs/
 parsl_vis.std*
 singularity_pull.std*
+tiegcm-work/
 

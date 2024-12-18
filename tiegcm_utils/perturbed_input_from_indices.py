@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import os
+import sys
 from scipy.stats import norm, truncnorm
-from tiegcm_utils.tiegcm_inputs import TGCMInput
+from tiegcm_inputs import TGCMInput
 
 def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, 
                             step:int, input_fn:str="tiegcm_res5.0.inp", 
@@ -203,13 +204,14 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, kp:float, f107:float, f107a:f
 
 if __name__ == '__main__':
     # Check if the correct number of arguments is provided
-    if len(sys.argv) != 6:
+    print(len(sys.argv))
+    if len(sys.argv) < 6:
         print("Usage: python perturbed_input_from_indices.py N_ENS WORK_DIR JOB_ID kp f107 f107a")
         sys.exit(1)
 
     # Read ensemble size and other parameters from command line arguments
     N_ENS = int(sys.argv[1])
-    WORK_DIR = int(sys.argv[2])
+    WORK_DIR = str(sys.argv[2])
     JOB_ID = str(sys.argv[3])
     kp = float(sys.argv[4])
     f107 = float(sys.argv[5])
@@ -217,7 +219,7 @@ if __name__ == '__main__':
     
     # Create the ensemble directories
     for ii in range(1, N_ENS+1):
-        my_dir=f"{WORK_DIR}/run/{JOB_ID}/{ii}"
+        my_dir=f"{WORK_DIR}/run/{JOB_ID}/mem{(ii):03}"
         os.makedirs(my_dir, exist_ok = False)
     
     # Launch main function that calls other functions
