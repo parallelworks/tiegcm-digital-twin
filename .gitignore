@@ -169,6 +169,7 @@ run/
 script/
 truncated_samples_F107.txt
 24/
+tiegcm-work/
 
 # Parsl logs
 runinfo/
