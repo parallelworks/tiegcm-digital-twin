@@ -6,7 +6,7 @@ from tiegcm_inputs import TGCMInput
 from fetch_indices import get_f107
 from fetch_indices import get_kp_array
 
-def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, 
+def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, hr_sim:int,
                             step:int, input_fn:str="tiegcm_res5.0.inp", 
                             kp:float=3., f107:float=90., f107a:float=90.) -> str:
     """
@@ -21,6 +21,7 @@ def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int,
     :param src_day: day of year of source file
     :param src_hr: hour of day of source file
     :param hr_diff: hour offset from source file
+    :param hr_sim: hour duration of simulation
     :param step: TIE-GCM internal timestep [seconds]
     :param input_fn: Input filename (optional, must be .inp)
     :param kp: Kp index (optional)
@@ -31,14 +32,14 @@ def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int,
     """
 
     # Configure date variables
-    src_str = f"{src_yr}_{src_day}_{src_hr:03}"
+    src_str = f"{src_yr}_{src_day:03}_{src_hr:03}"
     src_date = datetime.strptime(src_str, "%Y_%j_0%H")
     start_date = src_date + timedelta(hours=hr_diff)
     start_str = start_date.strftime("%Y_%j_0%H")
     start_year = start_date.year
     start_day = start_date.timetuple().tm_yday
     start_hour = start_date.hour
-    stop_date = start_date + timedelta(hours=3)
+    stop_date = start_date + timedelta(hours=hr_sim)
     stop_day = stop_date.timetuple().tm_yday
     stop_hour = stop_date.hour
 
@@ -178,7 +179,7 @@ def perturb_drivers(kp_mean:float, f107_mean:float, f107a:float,
                 else:
                     f.write(line)
 
-def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_HR:int, TIMESTEP:int, kp:float, f107:float, f107a:float):
+def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_HR:int, HR_DIFF:int, HR_SIM:int, TIMESTEP:int, kp:float, f107:float, f107a:float):
     # Set options
     #N_ENS = 100
     REL_STD = 0.1
@@ -189,6 +190,14 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_
     #SRC_DAY = 130
     #SRC_HR = 21
     run_workdir = f"{WORK_DIR}/run/{JOB_ID}"
+    
+    # This is the first time step of output to report
+    # (i.e. simulation fast forwards to this hour diff
+    # wrt the initialization time in the src time)
+    #hr_diff = 0  # hour offset from SRC time, can increment if looping over multiple timesteps
+    
+    # This the duration of the simulation
+    #HR_SIM=24
 
     # Generate and store relative perturbations for this run
     perturb_fn = f"{run_workdir}/ensemble_rel_perturbations.txt"
@@ -197,8 +206,7 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_
     # Configure input file    
     run_date = f"{SRC_YR}_{SRC_DAY:03}_{SRC_HR:03}"
     inp_fn = f"{WORK_DIR}/run/{JOB_ID}/tiegcm_res5.0_{run_date}.inp"
-    hr_diff = 0  # hour offset from SRC time, can increment if looping over multiple timesteps
-    run_date = configure_tgcm_timestep(SRC_YR, SRC_DAY, SRC_HR, hr_diff, TIMESTEP, inp_fn)
+    run_date = configure_tgcm_timestep(SRC_YR, SRC_DAY, SRC_HR, HR_DIFF, HR_SIM, TIMESTEP, inp_fn)
     kp_fn = f"{WORK_DIR}/run/{JOB_ID}/ensemble_kp_{run_date}.txt"
     f10_fn = f"{WORK_DIR}/run/{JOB_ID}/ensemble_f107_{run_date}.txt"
     perturb_drivers(kp, f107, f107a, relative_perturbations, run_workdir, 
@@ -206,8 +214,7 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_
 
 if __name__ == '__main__':
     # Check if the correct number of arguments is provided
-    print(len(sys.argv))
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 6:
         print("Usage: python perturbed_input_from_indices.py N_ENS WORK_DIR JOB_ID kp f107 f107a")
         sys.exit(1)
     #==============================================
@@ -226,7 +233,10 @@ if __name__ == '__main__':
     #SRC_HR = int(sys.argv[6])
     
     # Hardcoded?
+    HR_DIFF = 0
     TIMESTEP = 60
+    
+    HR_SIM = int(sys.argv[5])
     
     # Solar params - computed on the fly below
     #kp = float(sys.argv[8])
@@ -238,8 +248,11 @@ if __name__ == '__main__':
     #==============================================
     dt = datetime.strptime(datetime_str, '%Y/%m/%d/%H:%M:%S')
     SRC_YR = int(dt.strftime('%Y'))
-    SRC_DAY = int(dt.strftime('%J'))
+    SRC_DAY = int(dt.strftime('%j'))
     SRC_HR = int(dt.strftime('%H'))
+    
+    # For initial conditions file naming
+    src_str = f"{SRC_YR}_{SRC_DAY:03}_{SRC_HR:03}"
     
     #==============================================
     # Get solar forcing
@@ -256,6 +269,14 @@ if __name__ == '__main__':
         my_dir=f"{WORK_DIR}/run/{JOB_ID}/mem{(ii):03}"
         os.makedirs(my_dir, exist_ok = False)
     
+        # Change the path to this file for different initial
+        # conditions. The file name it is being copied to
+        # must match the first entry on in the OUTPUT
+        # parameter on the namelist (.inp) in 
+        # configure_tgcm_timestep, above.
+        os.system(f"cp {WORK_DIR}/data/tiegcm_res5.0_data/tiegcm_res5.0_mareqx_smin_prim.nc {my_dir}/tiegcm_primary_output_src_{src_str}.nc")
+        
+        
     #==============================================
     # Launch main function that calls other functions
     #==============================================
@@ -266,10 +287,12 @@ if __name__ == '__main__':
         SRC_YR = SRC_YR,
         SRC_DAY = SRC_DAY,
         SRC_HR = SRC_HR,
+        HR_DIFF = HR_DIFF,
+        HR_SIM = HR_SIM,
         TIMESTEP = TIMESTEP,
         kp=kp, 
         f107=f107, 
         f107a=f107a)
     
     src_str=f"{SRC_YR}_{SRC_DAY}_{SRC_HR:03}"
-    return src_str
+    print(src_str)
