@@ -7,7 +7,7 @@ from fetch_indices import get_f107
 from fetch_indices import get_kp_array
 
 def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, hr_sim:int,
-                            step:int, input_fn:str="tiegcm_res5.0.inp", 
+                            step:int, start_type:str, input_fn:str="tiegcm_res5.0.inp", 
                             kp:float=3., f107:float=90., f107a:float=90.) -> str:
     """
     Write the TIE-GCM input file for a 3-hour run given the source time (for 
@@ -43,51 +43,92 @@ def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, hr
     stop_day = stop_date.timetuple().tm_yday
     stop_hour = stop_date.hour
 
-    # Create input file object
-    # NOTE: using placeholders for Kp, F107, F107A
-    # These are adjusted on a per-ensemble-member basis separately
-    tgcm_input = TGCMInput(
-        AURORA=True,
-        CALC_HELIUM=True,
-        COLFAC=1.5,
-        CALENDAR_ADVANCE=True,
-        CURRENT_KQ=False,
-        CURRENT_PG=True,
-        DYNAMO=True,
-        F107=f107,
-        F107A=f107a,
-        GSWM_MI_DI_NCFILE="$TGCMDATA/gswm_diurn_5.0d_99km.nc",
-        GSWM_MI_SDI_NCFILE="$TGCMDATA/gswm_semi_5.0d_99km.nc",
-        HIST=(0, 0, 15),
-        LABEL="tiegcm res=5.0",
-        MXHIST_PRIM=12,
-        MXHIST_SECH=12,
-        KP=kp,
-        POTENTIAL_MODEL="HEELIS",
-        SECFLDS=[
-            'TN','UN','VN','WN','O2','O1','N2','NO','N4S','HE','NE','TE','TI','TEC',
-            'O2P','OP','POTEN','UI_ExB','VI_ExB','WI_ExB','DEN','QJOULE','HMF2',
-            'NMF2','Z','ZG'
-        ],
-        SECHIST=(0, 0, 15),
-        SECSTART=(start_day, start_hour, 15),
-        SECSTOP=(stop_day, stop_hour, 0),
-        START=(start_day, start_hour, 0),
-        START_DAY=start_day,
-        START_YEAR=start_year,
-        STEP=step,
-        STOP=(stop_day, stop_hour, 0),
-        OUTPUT=[f"tiegcm_primary_output_src_{src_str}.nc", f"tiegcm_primary_output_start_{start_str}.nc"],
-        SECOUT=f"tiegcm_secondary_output_{start_str}.nc",
-        SOURCE=None,
-        SOURCE_START=None,
-    )
-
+    # Create input file object differently for start type
+    # `cold` start: SOURCE is initial condition file, only one file listed in OUTPUT
+    # `warm` start: SOURCE=None, OUTPUT=[src_file, out_file]
+    if (start_type == "cold"):
+        tgcm_input = TGCMInput(            
+            AURORA=True,
+            CALC_HELIUM=True,
+            COLFAC=1.5,
+            CALENDAR_ADVANCE=True,
+            CURRENT_KQ=False,
+            CURRENT_PG=True,
+            DYNAMO=True,
+            F107=f107,
+            F107A=f107a,
+            GSWM_MI_DI_NCFILE="$TGCMDATA/gswm_diurn_5.0d_99km.nc",
+            GSWM_MI_SDI_NCFILE="$TGCMDATA/gswm_semi_5.0d_99km.nc",
+            HIST=(0, 0, 15),
+            LABEL="tiegcm res=5.0",
+            MXHIST_PRIM=12,
+            MXHIST_SECH=12,
+            KP=kp,
+            POTENTIAL_MODEL="HEELIS",
+            SECFLDS=[
+                'TN','UN','VN','WN','O2','O1','N2','NO','N4S','HE','NE','TE','TI','TEC',
+                'O2P','OP','POTEN','UI_ExB','VI_ExB','WI_ExB','DEN','QJOULE','HMF2',
+                'NMF2','Z','ZG'
+            ],
+            SECHIST=(0, 0, 15),
+            SECSTART=(start_day, start_hour, 15),
+            SECSTOP=(stop_day, stop_hour, 0),
+            START=(start_day, start_hour, 0),
+            START_DAY=start_day,
+            START_YEAR=start_year,
+            STEP=step,
+            STOP=(stop_day, stop_hour, 0),
+            OUTPUT=f"tiegcm_primary_output_{start_str}.nc",
+            SECOUT=f"tiegcm_secondary_output_{start_str}.nc",
+            SOURCE=f"tiegcm_primary_src_{src_str}.nc",
+            SOURCE_START=(start_day, start_hour, 0) # Required if using SOURCE e.g. (80, 0, 0)
+        )
+        end_message="Wrote cold start namelist."
+    elif (start_type == "warm"):
+        tgcm_input = TGCMInput(
+            AURORA=True,
+            CALC_HELIUM=True,
+            COLFAC=1.5,
+            CALENDAR_ADVANCE=True,
+            CURRENT_KQ=False,
+            CURRENT_PG=True,
+            DYNAMO=True,
+            F107=f107,
+            F107A=f107a,
+            GSWM_MI_DI_NCFILE="$TGCMDATA/gswm_diurn_5.0d_99km.nc",
+            GSWM_MI_SDI_NCFILE="$TGCMDATA/gswm_semi_5.0d_99km.nc",
+            HIST=(0, 0, 15),
+            LABEL="tiegcm res=5.0",
+            MXHIST_PRIM=12,
+            MXHIST_SECH=12,
+            KP=kp,
+            POTENTIAL_MODEL="HEELIS",
+            SECFLDS=[
+                'TN','UN','VN','WN','O2','O1','N2','NO','N4S','HE','NE','TE','TI','TEC',
+                'O2P','OP','POTEN','UI_ExB','VI_ExB','WI_ExB','DEN','QJOULE','HMF2',
+                'NMF2','Z','ZG'
+            ],
+            SECHIST=(0, 0, 15),
+            SECSTART=(start_day, start_hour, 15),
+            SECSTOP=(stop_day, stop_hour, 0),
+            START=(start_day, start_hour, 0),
+            START_DAY=start_day,
+            START_YEAR=start_year,
+            STEP=step,
+            STOP=(stop_day, stop_hour, 0),
+            OUTPUT=[f"tiegcm_primary_src_{src_str}.nc", f"tiegcm_primary_output_start_{start_str}.nc"],
+            SECOUT=f"tiegcm_secondary_output_{start_str}.nc",
+            SOURCE=None,
+            SOURCE_START=None,
+        )
+        end_message="Wrote warm start namelist."
+    else:
+        end_message="ERROR! You must pick either a `cold` or `warm` start_type!"
+        
     # Write input file
     tgcm_input.write_to_file(input_fn)
 
-    return start_str
-
+    return end_message
 
 def generate_perturbations(n_ens:int, std:float, mean:float=1., range:float=None,
                            fn:str="ensemble_rel_perturbations.txt") -> list[float]:
@@ -179,7 +220,7 @@ def perturb_drivers(kp_mean:float, f107_mean:float, f107a:float,
                 else:
                     f.write(line)
 
-def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_HR:int, HR_DIFF:int, HR_SIM:int, TIMESTEP:int, kp:float, f107:float, f107a:float):
+def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_HR:int, HR_DIFF:int, HR_SIM:int, TIMESTEP:int, start_type:str, kp:float, f107:float, f107a:float):
     # Set options
     #N_ENS = 100
     REL_STD = 0.1
@@ -206,7 +247,7 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_
     # Configure input file    
     run_date = f"{SRC_YR}_{SRC_DAY:03}_{SRC_HR:03}"
     inp_fn = f"{WORK_DIR}/run/{JOB_ID}/tiegcm_res5.0_{run_date}.inp"
-    run_date = configure_tgcm_timestep(SRC_YR, SRC_DAY, SRC_HR, HR_DIFF, HR_SIM, TIMESTEP, inp_fn)
+    run_date = configure_tgcm_timestep(SRC_YR, SRC_DAY, SRC_HR, HR_DIFF, HR_SIM, TIMESTEP, start_type, inp_fn)
     kp_fn = f"{WORK_DIR}/run/{JOB_ID}/ensemble_kp_{run_date}.txt"
     f10_fn = f"{WORK_DIR}/run/{JOB_ID}/ensemble_f107_{run_date}.txt"
     perturb_drivers(kp, f107, f107a, relative_perturbations, run_workdir, 
@@ -214,8 +255,10 @@ def write_inp(N_ENS:int, WORK_DIR:str, JOB_ID:str, SRC_YR:int, SRC_DAY:int, SRC_
 
 if __name__ == '__main__':
     # Check if the correct number of arguments is provided
-    if len(sys.argv) < 6:
-        print("Usage: python perturbed_input_from_indices.py N_ENS WORK_DIR JOB_ID kp f107 f107a")
+    # Typical command line call:
+    # python tiegcm_utils/perturbed_input_from_indices.py {ens_size} {work_dir} {runid} {datetime_str} {simulation_hours} {start_type} {src_file}
+    if len(sys.argv) < 8:
+        print("Usage: python perturbed_input_from_indices.py N_ENS WORK_DIR JOB_ID datetime_str simulation_hours start_type src_file")
         sys.exit(1)
     #==============================================
     # Read ensemble size and other parameters from 
@@ -237,12 +280,27 @@ if __name__ == '__main__':
     TIMESTEP = 60
     
     HR_SIM = int(sys.argv[5])
+    start_type = str(sys.argv[6])
+    src_file = str(sys.argv[7])
     
     # Solar params - computed on the fly below
     #kp = float(sys.argv[8])
     #f107 = float(sys.argv[9])
     #f107a = float(sys.argv[10])
 
+    print("Starting perturbed_input_from_indices with:")
+    print("N_ENS: "+str(N_ENS))
+    print("WORK_DIR: "+WORK_DIR)
+    print("JOB_ID: "+JOB_ID)
+    print("datetime_str: "+datetime_str)
+    print("HR_DIFF: "+str(HR_DIFF))
+    print("TIMESTEP: "+str(TIMESTEP))
+    print("HR_SIM: "+str(HR_SIM))
+    print("start_type: "+start_type)
+    print("src_file: "+src_file)
+    
+    print("Start working on intermediate values...")
+    
     #==============================================
     # Date information
     #==============================================
@@ -254,32 +312,41 @@ if __name__ == '__main__':
     # For initial conditions file naming
     src_str = f"{SRC_YR}_{SRC_DAY:03}_{SRC_HR:03}"
     
+    print("datetime_str converted to Y-D-H: "+src_str)
+    
     #==============================================
     # Get solar forcing
     #==============================================
     (f107, f107a) = get_f107(dt)
+    
+    print("Solar forcing f107: "+str(f107))
+    print("Solar forcing f107a: "+str(f107a))    
+    
     kp_array = get_kp_array(dt)
     # We only want the last value in the Kp array
     kp=kp_array[-1]
     
+    print("Solar forcing Kp: "+str(kp))
+    
     #==============================================
     # Create the ensemble directories
     #==============================================
+    print("Creating ensemble dirs...")
     for ii in range(1, N_ENS+1):
         my_dir=f"{WORK_DIR}/run/{JOB_ID}/mem{(ii):03}"
         os.makedirs(my_dir, exist_ok = False)
     
         # Change the path to this file for different initial
         # conditions. The file name it is being copied to
-        # must match the first entry on in the OUTPUT
-        # parameter on the namelist (.inp) in 
+        # must match the first entry on in the SOURCE
+        # or OUTPUT parameter on the namelist (.inp) in 
         # configure_tgcm_timestep, above.
-        os.system(f"cp {WORK_DIR}/data/tiegcm_res5.0_data/tiegcm_res5.0_mareqx_smin_prim.nc {my_dir}/tiegcm_primary_output_src_{src_str}.nc")
-        
+        os.system(f"cp {WORK_DIR}/{src_file} {my_dir}/tiegcm_primary_src_{src_str}.nc")
         
     #==============================================
     # Launch main function that calls other functions
     #==============================================
+    print("Calling write_inp to make namelists...")
     write_inp(
         N_ENS=N_ENS, 
         WORK_DIR=WORK_DIR, 
@@ -290,9 +357,9 @@ if __name__ == '__main__':
         HR_DIFF = HR_DIFF,
         HR_SIM = HR_SIM,
         TIMESTEP = TIMESTEP,
+        start_type = start_type,
         kp=kp, 
         f107=f107, 
         f107a=f107a)
     
-    src_str=f"{SRC_YR}_{SRC_DAY}_{SRC_HR:03}"
-    print(src_str)
+    print("Done!")
