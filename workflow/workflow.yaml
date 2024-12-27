@@ -9,6 +9,8 @@ sessions:
 jobs:
   preprocessing:
     steps:
+      - name: Test
+        run: echo ${{ inputs.pwrl_host.resource.ip }}
       - name: Preprocessing
         run: ./utils/steps-v3/preprocessing/preprocessing.sh 
       - name: Validating Target Resource
