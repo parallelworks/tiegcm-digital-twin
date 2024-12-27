@@ -10,11 +10,17 @@ jobs:
         run: |
           $(${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twin")
       - name: Check and install OpenMPI
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           echo Checking for MPI...
+          $(${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_openmpi.sh")
       - name: Check and install Conda env
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           echo Checking for Conda env...
+          $(${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_conda.sh /home/$USER/pw/software/.miniconda3 parsl")
   run_workflow:
     needs:
       - preprocessing
