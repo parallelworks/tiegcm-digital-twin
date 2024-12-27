@@ -8,7 +8,7 @@ jobs:
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
-          $(${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twim")
+          $(${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twin")
       - name: Check and install OpenMPI
         run: |
           echo Checking for MPI...
