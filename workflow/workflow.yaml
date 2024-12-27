@@ -8,7 +8,7 @@ jobs:
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
-          echo $PWD
+          $(${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twim")
       - name: Check and install OpenMPI
         run: |
           echo Checking for MPI...
@@ -25,8 +25,8 @@ jobs:
         run: |
           target_hostname=$(${sshcmd} hostname)
           echo "target_hostname=${target_hostname}"
-          echo ${{ inputs.tiegcm_inputs.start_type }}
-          echo ${{ inputs.tiegcm_inputs.n_ens}}
+          echo ${{ inputs.tiegcm.start_type }}
+          echo ${{ inputs.tiegcm.n_ens}}
 'on':
   execute:
     inputs:
@@ -40,10 +40,15 @@ jobs:
             include-workspace: false
             tooltip: Resource to host the workflow
         collapsed: false
-      tiegcm_inputs:
+      tiegcm:
         type: group
         label: TIEGCM Settings
         items:
+          workdir_root:
+            label: Main working directory for everything
+            type: string
+            default: /home/${USER}/pw/software/
+            tooltip: Root directory for where workflow lives and runs
           start_type:
             label: Start type
             type: string
