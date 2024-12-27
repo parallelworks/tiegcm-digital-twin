@@ -1,10 +1,5 @@
 permissions:
   - '*'
-sessions:
-  session:
-    useTLS: false
-    redirect: true
-
 
 jobs:
   preprocessing:
@@ -19,20 +14,19 @@ jobs:
           echo Checking for MPI...
       - name: Check and install Conda env
         run: |
-          echo CHecking for Conda env...
-
+          echo Checking for Conda env...
   run_workflow:
     needs:
-       - preprocessing
+      - preprocessing
     steps:
-       - name: Launch workflow
-         env:
+      - name: Launch workflow
+        env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           target_hostname=$(${sshcmd} hostname)
           echo "target_hostname=${target_hostname}"
-          echo ${{ inputs. }}
-
+          echo ${{ inputs.tiegcm_inputs.start_type }}
+          echo ${{ inputs.tiegcm_inputs.n_ens}}
 'on':
   execute:
     inputs:
@@ -50,18 +44,15 @@ jobs:
         type: group
         label: TIEGCM Settings
         items:
-          warm_start:
-            label: Warm start?
-            type: boolean
-            default: true
-            tooltip: Select Yes for warm start, no for cold start.
-          mlflow_install_cmd:
-            label: Command to Install MLflow
+          start_type:
+            label: Start type
             type: string
-            default: pip3 install mlflow
+            default: warm
+            tooltip: Select from 'warm' or 'cold' starts
           n_ens:
             label: Number of ensemble members
-            type: integer
+            type: number
             default: 10
             tooltip: Enter the integer number of TIEGCM ensemble members.
+
 
