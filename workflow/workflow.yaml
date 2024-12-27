@@ -9,75 +9,29 @@ sessions:
 jobs:
   preprocessing:
     steps:
-      - name: Test
-        run: echo ${{ inputs.pwrl_host.resource.ip }}
-      - name: Preprocessing
-        run: ./utils/steps-v3/preprocessing/preprocessing.sh 
-      - name: Validating Target Resource
-        run: ./utils/steps-v3/preprocessing/input_form_resource_wrapper.sh ${{ inputs.pwrl_host.resource.ip }}
-      - name: Process Inputs
-        run: | 
-          ./utils/steps-v3/preprocessing/process_inputs_sh.sh 
-          echo "export basepath=/me/session/${PW_USER}/${{ sessions.session }}"  >> resources/host/inputs.sh
-      - name: Transfer Files to Controller
-        run: ./utils/steps-v3/preprocessing/transfer_files_to_controller.sh
-      - name: Controller Preprocessing
-        run: ./utils/steps-v3/preprocessing/controller_preprocessing.sh
-      - name: Initialize Cancel Script
-        run: ./utils/steps-v3/preprocessing/initialize_cancel_script.sh
-
-  controller_job:
-    needs:
-       - preprocessing
-    steps:
-      - name: Create Controller Session Script
-        if: ${{ 'CONTROLLER' === inputs.pwrl_host.jobschedulertype }}
-        run: ./utils/steps-v3/controller/create_session_script.sh
-      - name: Launch and Monitor Controller Job
-        if: ${{ 'CONTROLLER' === inputs.pwrl_host.jobschedulertype }}
-        run: ./utils/steps-v3/controller/launch_and_monitor_job.sh
-        cleanup: |
-          if [[ "${{ inputs.pwrl_host.jobschedulertype }}" == "CONTROLLER" ]]; then
-            ./kill.sh
-          fi
-      - name: Clean and Exit
-        if: ${{ 'CONTROLLER' === inputs.pwrl_host.jobschedulertype }}
-        run: ./utils/steps-v3/clean_and_exit.sh
-
-  compute_job:
-    needs:
-       - preprocessing
-    steps:
-      - name: Create Compute Session Script
-        if: ${{ 'CONTROLLER' !== inputs.pwrl_host.jobschedulertype }}
-        run: ./utils/steps-v3/compute/create_session_script.sh
-      - name:  Launch and Monitor Compute Job
-        if: ${{ 'CONTROLLER' !== inputs.pwrl_host.jobschedulertype }}
-        run: ./utils/steps-v3/compute/launch_and_monitor_job.sh
-        cleanup: |
-          if [[ "${{ inputs.pwrl_host.jobschedulertype }}" != "CONTROLLER" ]]; then
-            ./kill.sh
-          fi
-      - name: Clean and Exit
-        if: ${{ 'CONTROLLER' !== inputs.pwrl_host.jobschedulertype }}
-        run: ./utils/steps-v3/clean_and_exit.sh
-
+      - name: Clone workflow code to resource
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
+        run: |
+          echo $PWD
+      - name: Check and install OpenMPI
+        run: |
+          echo Checking for MPI...
+      - name: Check and install Conda env
+        run: |
+          echo CHecking for Conda env...
 
   run_workflow:
     needs:
        - preprocessing
     steps:
-      - name: Set Session Name
-        run: |
-          session_name=$(pwd | rev | cut -d'/' -f1-2 | tr '/' '-' | rev)
-          echo "session_name=${session_name}" | tee -a $OUTPUTS
-      - name: Get Controller Hostname
-        if: ${{ 'CONTROLLER' === inputs.pwrl_host.jobschedulertype }}
-        env:
+       - name: Launch workflow
+         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           target_hostname=$(${sshcmd} hostname)
-          echo "target_hostname=${target_hostname}"  | tee -a $OUTPUTS
+          echo "target_hostname=${target_hostname}"
+          echo ${{ inputs. }}
 
 'on':
   execute:
@@ -88,31 +42,25 @@ jobs:
         items:
           resource:
             type: compute-clusters
-            label: Service host
+            label: Workflow host
             include-workspace: false
-            tooltip: Resource to host the service
+            tooltip: Resource to host the workflow
         collapsed: false
-      service:
+      tiegcm_inputs:
         type: group
         label: TIEGCM Settings
         items:
-          name:
-            type: string
-            hidden: true
-            default: mlflow
-          install_mlflow:
-            label: Install MLflow?
+          warm_start:
+            label: Warm start?
             type: boolean
             default: true
-            tooltip: Select Yes to install MLflow and No to load MLflow into the environment
+            tooltip: Select Yes for warm start, no for cold start.
           mlflow_install_cmd:
             label: Command to Install MLflow
             type: string
             default: pip3 install mlflow
-            hidden: ${{ inputs.service.install_mlflow == false }}
-            ignore: ${{ .hidden }}
-          mlflow_load_cmd:
-            label: Command to Load MLflow
-            type: string
-            hidden: ${{ inputs.service.install_mlflow == true }}
-            ignore: ${{ .hidden }}
+          n_ens:
+            label: Number of ensemble members
+            type: integer
+            default: 10
+            tooltip: Enter the integer number of TIEGCM ensemble members.
