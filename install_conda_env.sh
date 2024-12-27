@@ -26,6 +26,13 @@ echo Starting $0
 # accessible location on the cluster.
 miniconda_loc=$1
 
+# Check if OpenMPI is already installed
+if [ -d $miniconda_loc ]; then
+	echo It appears that Miniconda is already installed at $miniconda_loc
+	echo Exiting the installer.
+        exit 0
+fi
+
 # Download current version of
 # Miniconda installer
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
