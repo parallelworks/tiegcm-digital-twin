@@ -47,7 +47,7 @@ jobs:
           workdir_root:
             label: Main working directory for everything
             type: string
-            default: /home/${USER}/pw/software/
+            default: /home/${USER}/pw/jobs/
             tooltip: Root directory for where workflow lives and runs
           start_type:
             label: Start type
