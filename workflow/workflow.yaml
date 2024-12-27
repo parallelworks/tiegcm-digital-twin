@@ -14,7 +14,7 @@ jobs:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           echo Checking for MPI...
-          $(${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_openmpi.sh")
+          $(${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_openmpi.sh 1>install_openmpi.stdout 2>install_openmpi.stderr")
       - name: Check and install Conda env
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
