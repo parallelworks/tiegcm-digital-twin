@@ -8,19 +8,19 @@ jobs:
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
-          $(${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twin; cd tiegcm-digital-twin; git checkout sfg-fix-create_ens_dirs 1>checkout.stdout 2>checkout.stderr")
+          ${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twin; cd tiegcm-digital-twin; git checkout sfg-fix-create_ens_dirs"
       - name: Check and install OpenMPI
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           echo Checking for MPI...
-          $(${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_openmpi.sh 1>install_openmpi.stdout 2>install_openmpi.stderr")
+          ${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_openmpi.sh"
       - name: Check and install Conda env
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           echo Checking for Conda env...
-          $(${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_conda_env.sh /home/$USER/pw/software/.miniconda3 parsl 1>install_conda_env.stdout 2>install_conda_env.stderr")
+          ${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_conda_env.sh /home/$USER/pw/software/.miniconda3 parsl"
   run_workflow:
     needs:
       - preprocessing
@@ -29,7 +29,7 @@ jobs:
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
-          target_hostname=$(${sshcmd} hostname)
+          target_hostname=${sshcmd} "hostname"
           echo "target_hostname=${target_hostname}"
           echo ${{ inputs.tiegcm.start_type }}
           echo ${{ inputs.tiegcm.n_ens}}
