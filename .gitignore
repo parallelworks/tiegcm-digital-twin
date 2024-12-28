@@ -176,4 +176,6 @@ parsl-app-logs/
 parsl_vis.std*
 singularity_pull.std*
 tiegcm-work/
+tiegcm-work.backup/
+parsl-app-logs.backup/
 
