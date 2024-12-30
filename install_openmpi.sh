@@ -13,8 +13,18 @@ echo "===> Set up OpenMPI build environment variables"
 
 # OpenMPI needs to be installed in a shared directory
 export OMPI_DIR=${HOME}/ompi
+
+# Check if OpenMPI is already installed
+if [ -d $OMPI_DIR ]; then
+	echo It appears that OpenMPI is already installed at $OMPI_DIR
+	echo Exiting installer.
+        exit 0
+fi
+
+# Proceed with installation
 mkdir -p $OMPI_DIR/bin
 mkdir -p $OMPI_DIR/lib
+
 
 # Update OpenMPI version as needed
 # v5.0+ requires PMIx.

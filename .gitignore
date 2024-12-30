@@ -170,10 +170,16 @@ script/
 truncated_samples_F107.txt
 24/
 
+# Papermill logs
+_papermill.log
+OUTPUT.ipynb
+
 # Parsl logs
 runinfo/
 parsl-app-logs/
 parsl_vis.std*
 singularity_pull.std*
 tiegcm-work/
+tiegcm-work.backup/
+parsl-app-logs.backup/
 

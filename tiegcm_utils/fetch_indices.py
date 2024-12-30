@@ -74,9 +74,14 @@ def get_kp_array(dt:datetime) -> list[float]:
     line = find_day(dt)
     # parse out Kp for the day until the start time
     kp_array = []
-    for h in range(0, dt.hour, 3):
-        kp_start = 34 + 7*(h//3)
+    # Add special check for hour 00 (midnight + 59 minutes)
+    if ( dt.hour == 0 ):
+        kp_start = 34
         kp_array.append(float(line[kp_start:kp_start+5]))
+    else:
+        for h in range(0, dt.hour, 3):
+            kp_start = 34 + 7*(h//3)
+            kp_array.append(float(line[kp_start:kp_start+5]))
     # make sure the grabbed values are valid
     if kp_array == [] or any(kp < 0 for kp in kp_array):
         raise RuntimeError(f'One or more Kp values for the requested time are invalid. Got {kp_array}')

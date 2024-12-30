@@ -32,6 +32,15 @@ singularity pull tiegcm.sif docker://parallelworks/tiegcm.sif
 ```
 This command is integrated into the workflow.
 
+## Organization
+
++ `requirements` specifies the Conda environments used in this project.
++ `scripts.manual` contains scripts used during the initial manual tests of TIEGCM.
++ `tiegcm_utils` contains supporting scripts for gathering solar forcing and building TIEGCM namelists (`.inp` files)
++ `workflow` contains a Parallel Works workflow specification `.yaml`
+
+Other files in the top level of this repository are core files used by the workflow.
+
 ## Compute resource usage
 ```
 time run.sh
