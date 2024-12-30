@@ -20,7 +20,7 @@ jobs:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
           echo Checking for Conda env...
-          ${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_conda_env.sh /home/$USER/pw/software/.miniconda3c parsl"
+          ${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_conda_env.sh ${{inputs.tiegcm.conda_base_path}} parsl"
   run_workflow:
     needs:
       - preprocessing
