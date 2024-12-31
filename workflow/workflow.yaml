@@ -36,7 +36,7 @@ jobs:
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
-          ${sshcmd} "hostname && . ${{ inputs.tiegcm.conda_base_path }}/etc/profile.d/conda.sh && conda activate ${{ inputs.tiegcm.conda_base_path }}/envs/parsl && cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin && (papermill -k python3 TIEGCM_workflow.ipynb OUTPUT.ipynb 2>&1 | tee _papermill.log)"
+          ${sshcmd} "hostname && . ${{ inputs.tiegcm.conda_base_path }}/etc/profile.d/conda.sh && conda activate ${{ inputs.tiegcm.conda_base_path }}/envs/parsl && cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin && (papermill -k python3 TIEGCM_workflow.ipynb OUTPUT.ipynb -p runid 2>&1 | tee _papermill.log)"
     
 'on':
   execute:
@@ -95,6 +95,11 @@ jobs:
             type: string
             default: ./tiegcm-work
             tooltip: The working directory for the runs
+          param_runid:
+            label: Run ID
+            type: string
+            default: test001
+            tooltip: The Run ID doubles as a subdir under working directory
           param_range_limit:
             label: Range limit
             type: number
@@ -104,5 +109,5 @@ jobs:
             label: Date for the model
             type: string
             default: 2023/09/21/00:00:00
-            tooltip: The date and time for the model
+            tooltip: The date and time for the model in format YYYY/MM/DD/HH:MM:SS
             
