@@ -36,7 +36,7 @@ jobs:
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
-          ${sshcmd} "hostname && . ${{ inputs.tiegcm.conda_base_path }}/etc/profile.d/conda.sh && conda activate ${{ inputs.tiegcm.conda_base_path }}/envs/parsl && cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin && (papermill -k python3 TIEGCM_workflow.ipynb OUTPUT.ipynb -p runid 2>&1 | tee _papermill.log)"
+          ${sshcmd} "hostname && . ${{ inputs.tiegcm.conda_base_path }}/etc/profile.d/conda.sh && conda activate ${{ inputs.tiegcm.conda_base_path }}/envs/parsl && cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin && (papermill -k python3 TIEGCM_workflow.ipynb OUTPUT.ipynb -p param_runid ${{inputs.tiegcm.param_runid}} -p param_workdir_root ${{inputs.tiegcm.param_work_dir_root}} 2>&1 | tee _papermill.log)"
     
 'on':
   execute:
