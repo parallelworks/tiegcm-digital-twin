@@ -27,7 +27,8 @@ if __name__ == "__main__":
     printd('\n'.join(sys.argv))
     user = sys.argv[1]  # echo ${PW_USER}
     wf_name = sys.argv[2]
-    wf_xml_args = json.loads(sys.argv[3])
+    with open(sys.argv[3]) as f:
+        wf_xml_args = json.load(f)
     resource_ids = None
     if len(sys.argv) == 5:
         if sys.argv[4]:

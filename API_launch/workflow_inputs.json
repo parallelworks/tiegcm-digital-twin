@@ -1,0 +1,25 @@
+{
+  "pwrl_host": {
+    "resource": {
+      "type": "computeResource",
+      "id": "63ce5e6b3b2d701602af20ef",
+      "provider": "gclusterv2",
+      "ip": "34.29.43.119",
+      "namespace": "sfgary",
+      "name": "gce1"
+    }
+  },
+  "tiegcm": {
+    "workdir_root": "/home/${USER}/pw/jobs/",
+    "start_type": "cold",
+    "n_ens": 10,
+    "param_simulation_hours": 2,
+    "conda_base_path": "$HOME/pw/software/.miniconda3c",
+    "conda_env_name": "parsl",
+    "param_log_dir": "./parsl-app-logs",
+    "param_work_dir_root": "./tiegcm-work",
+    "param_runid": "test001",
+    "param_range_limit": 5,
+    "param_datetime_str": "2023/09/21/00:00:00"
+  }
+}
