@@ -125,10 +125,13 @@ def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, hr
     else:
         end_message="ERROR! You must pick either a `cold` or `warm` start_type!"
         
+    print(end_message)
+    
     # Write input file
     tgcm_input.write_to_file(input_fn)
-
-    return end_message
+    tgcm_input_start=str(start_year)+"_"+str(start_day)+"_"+str(start_hour)
+    
+    return tgcm_input_start
 
 def generate_perturbations(n_ens:int, std:float, mean:float=1., range:float=None,
                            fn:str="ensemble_rel_perturbations.txt") -> list[float]:
