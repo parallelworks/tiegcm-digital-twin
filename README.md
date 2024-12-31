@@ -38,6 +38,7 @@ This command is integrated into the workflow.
 + `scripts.manual` contains scripts used during the initial manual tests of TIEGCM.
 + `tiegcm_utils` contains supporting scripts for gathering solar forcing and building TIEGCM namelists (`.inp` files)
 + `workflow` contains a Parallel Works workflow specification `.yaml`
++ `API_launch` contains scripts and example input data for launching the workflow from an API call to the the PW platform.
 
 Other files in the top level of this repository are core files used by the workflow.
 
