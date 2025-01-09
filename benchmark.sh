@@ -8,7 +8,7 @@ extract_cores() {
 }
 
 # Gather the list of partitions
-partitions=$(sinfo | awk '{print $1}' | egrep -v PARTITION | sed 's/*//' | sort)
+partitions=$(sinfo | grep 'idle~' | awk '{print $1}' | egrep -v PARTITION | sed 's/*//' | sort)
 
 # Mandatory notebook parameters
 PARAM_RUNID="test001"
