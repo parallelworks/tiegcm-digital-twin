@@ -182,4 +182,4 @@ singularity_pull.std*
 tiegcm-work/
 tiegcm-work.backup/
 parsl-app-logs.backup/
-
+monitoring.*
