@@ -27,6 +27,7 @@ for partition in $partitions; do
   total_cores=$(extract_cores "$partition")
   ensembles=$((total_cores / 4))
 
+  echo "---Executing against $partition with $total_cores cores and $ensembles ensembles" ; echo
   # Run the notebook script
   ./notebook-execute.sh \
     --param_partition="$partition" \
