@@ -61,8 +61,8 @@ def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, hr
             GSWM_MI_SDI_NCFILE="$TGCMDATA/gswm_semi_5.0d_99km.nc",
             HIST=(0, 0, 15),
             LABEL="tiegcm res=5.0",
-            MXHIST_PRIM=12,
-            MXHIST_SECH=12,
+            MXHIST_PRIM=200,
+            MXHIST_SECH=200,
             KP=kp,
             POTENTIAL_MODEL="HEELIS",
             SECFLDS=[
@@ -99,8 +99,8 @@ def configure_tgcm_timestep(src_yr:int, src_day:int, src_hr:int, hr_diff:int, hr
             GSWM_MI_SDI_NCFILE="$TGCMDATA/gswm_semi_5.0d_99km.nc",
             HIST=(0, 0, 15),
             LABEL="tiegcm res=5.0",
-            MXHIST_PRIM=12,
-            MXHIST_SECH=12,
+            MXHIST_PRIM=200,
+            MXHIST_SECH=200,
             KP=kp,
             POTENTIAL_MODEL="HEELIS",
             SECFLDS=[

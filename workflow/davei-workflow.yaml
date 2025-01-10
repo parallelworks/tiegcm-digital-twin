@@ -1,0 +1,131 @@
+permissions:
+  - '*'
+jobs:
+  preprocessing:
+    steps:
+      - name: Clone workflow code to resource
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
+        run: |
+          ${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twin; cd tiegcm-digital-twin; git checkout sfg-fix-create_ens_dirs"
+      - name: Check and install OpenMPI
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
+        run: |
+          echo Checking for MPI...
+          ${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; ./install_openmpi.sh"
+      - name: Check and install Conda env
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
+        run: |
+          echo Checking for Conda env...
+          ${sshcmd} "cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin; \
+          ./install_conda_env.sh ${{inputs.tiegcm.conda_base_path}} parsl"
+  run_workflow:
+    needs:
+      - preprocessing
+    steps:
+      - name: Hostname test
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
+        run: |
+          ${sshcmd} "hostname"
+          echo ${{ inputs.tiegcm.start_type }}
+          echo ${{ inputs.tiegcm.n_ens}}
+      - name: Notebook execute
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
+        run: |
+          ${sshcmd} ". ${{inputs.tiegcm.conda_base_path}}/etc/profile.d/conda.sh && \
+          conda activate ${{inputs.tiegcm.conda_base_path}}/envs/parsl && \
+          cd ${{inputs.tiegcm.workdir_root}}/tiegcm-digital-twin && \
+          (papermill -k python3 -p param_partition ${{inputs.param_partition}} \
+          -p param_runid ${{inputs.tiegcm.param_runid}} \
+          -p param_start_type ${{ inputs.tiegcm.param_start_type}} \
+          -p param_ens_size ${{ inputs.tiegcm.param_ens_size }} \
+          -p param_simulation_hours ${{ inputs.tiegcm.param_simulation_hours }} \
+          -p param_range_limit ${{ inputs.tiegcm.param_range_limit }} \
+          -p param_datetime_str '${{inputs.tiegcm.param_datetime_str}}' \
+          -p param_walltime_limit '${{inputs.tiegcm.param_walltime_limit}}' \
+          TIEGCM_workflow.ipynb OUTPUT.ipynb 2>&1 | tee _papermill.log)"
+'on':
+  execute:
+    inputs:
+      pwrl_host:
+        type: group
+        label: TIEGCM
+        items:
+          resource:
+            type: compute-clusters
+            label: Workflow host
+            include-workspace: false
+            tooltip: Resource to host the workflow
+        collapsed: false
+      param_partition:
+        type: slurm-partitions
+        resource: ${{ inputs.pwrl_host.resource }}
+      tiegcm:
+        type: group
+        label: TIEGCM Settings
+        items:
+          workdir_root:
+            label: Main working directory for everything
+            type: string
+            default: /home/${USER}/pw/jobs/
+            tooltip: Root directory for where workflow lives and runs
+          param_start_type:
+            label: Start type
+            type: string
+            default: cold
+            tooltip: Select from 'warm' or 'cold' starts
+          param_ens_size:
+            label: Number of ensemble members
+            type: number
+            default: 10
+            tooltip: Enter the integer number of TIEGCM ensemble members.
+          param_simulation_hours:
+            label: Simulation hours
+            type: number
+            default: 2
+            tooltip: Enter the number of hours of the simulation to run
+          conda_base_path:
+            label: Conda base path
+            type: string
+            default: $HOME/pw/software/.miniconda3c
+            tooltip: The directory where the conda environment will live
+          conda_env_name:
+            label: Conda environment name
+            type: string
+            default: parsl
+            tooltip: The name of the conda environment - you should leave this at the default
+          param_log_dir:
+            label: Parsl application log directory
+            type: string
+            default: ./parsl-app-logs
+            tooltip: The location of the parsl app logs
+          param_work_dir_root:
+            label: Work directory root
+            type: string
+            default: ./tiegcm-work
+            tooltip: The working directory for the runs
+          param_runid:
+            label: Run ID
+            type: string
+            default: test001
+            tooltip: The Run ID doubles as a subdir under working directory
+          param_range_limit:
+            label: Range limit
+            type: number
+            default: 5
+            tooltip: Range number
+          param_datetime_str:
+            label: Date for the model
+            type: string
+            default: 2023/09/21/00:00:00
+            tooltip: The date and time for the model
+          param_walltime_limit:
+            label: Wall clock time limit (HH:MM:SS)
+            type: string
+            default: '01:00:00'
+            tooltip: The maximum amount of time to hold open the TIECGM parsl pilot jobs in HH:MM:SS
+
