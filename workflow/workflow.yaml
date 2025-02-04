@@ -8,7 +8,7 @@ jobs:
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
         run: |
-          ${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twin; cd tiegcm-digital-twin; git checkout online-initial-conditions"
+          ${sshcmd} "mkdir -p ${{inputs.tiegcm.workdir_root}}; cd ${{inputs.tiegcm.workdir_root}}; git clone https://github.com/parallelworks/tiegcm-digital-twin; cd tiegcm-digital-twin; git checkout ${{inputs.tiegcm.wflow_code_branch}}"
       - name: Check and install OpenMPI
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.pwrl_host.resource.ip }}
@@ -75,6 +75,11 @@ jobs:
             type: number
             default: 2
             tooltip: Enter the number of hours of the simulation to run
+          wflow_code_branch:
+            label: Workflow code branch
+            type: string
+            default: canary
+            tooltip: Specify the branch of tiegcm-digital-twin that you want to use for the workflow.
           conda_base_path:
             label: Conda base path
             type: string
