@@ -5,7 +5,7 @@
 
 echo "Stopping workers: ${1}"
 
-sudo scontrol update nodename="${1}" state=power_down
+sudo scontrol update nodename="${1}" state=power_down_force
 
 echo "Workers should be stopped. Check their status in sinfo."
 
