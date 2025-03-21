@@ -1,17 +1,29 @@
 # tiegcm-digital-twin
 Using TIEGCM as a digital twin
 
+## Goals
+
+This workflow is meant to be run three different ways:
+1. interactively by executing the cells of the notebook `TIEGCM_workflow.ipynb` (user is responsible for installing OpenMPI);
+2. via the Parallel Works ACTIVATE graphical user interface (i.e. a remote workflow that uses `papermill` to invoke the notebook in \#1 and automated installation of OpenMPI); and
+3. via an API call to activate.parallel.works that starts the workflow (\#2).
+
+This hierarchy of workflow execution types allows for the integration of workflow development (i.e. interactive testing of new features in the notebook) with automated/programmatic launching of the workflow.
+
 ## Dependencies
 
-This workflow depends on the following:
-1. the Jupyter notebook or `main.py` workflow in this repo;
-2. the Conda env with Parsl bootstrapped by the notebook/workflow;
-3. TIEGCM Docker container converted to Singularity on-the-fly; and
-4. some initialization and configuration tarballs in a cloud bucket.
+The 3 different workflow launch mechanisms depend on the following heirarchy of files:
+1. Jupyter notebook `TIEGCM_workflow.ipynb`;
+2. workflow definition file `./workflow/workflow.yaml` in this repo; and
+3. API client in `API_launch`.
+
+In all cases, the workflow also depends on the following artifacts:
+4. a Conda env with Parsl (often bootstrapped by the notebook);
+6. TIEGCM Docker container converted to Singularity on-the-fly;
+7. publicly available TIEGCM initialization and configuration files downloaded on-the-fly; and
+8. TIEGCM is launched by `mpiexec`, so you'll also need OpenMPI or Intel MPI. Please see `install_openmpi.sh` distributed with this repository (and executed automatically as part of workflow levels \#2 and \#3) for an example of OpenMPI installation.
 
 The original TIEGCM model is available from http://www.hao.ucar.edu/modeling/tgcm/download.php and is distributed under an academic, non-commercial [license](https://www.hao.ucar.edu/modeling/tgcm/download/files/tiegcmlicense.txt).
-
-5. TIEGCM is launched by mpiexec, so you'll also need OpenMPI or Intel MPI. Please see `install_openmpi.sh` distributed with this repository for an example of OpenMPI installation.
 
 ## Container conversion
 
