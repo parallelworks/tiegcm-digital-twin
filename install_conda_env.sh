@@ -50,6 +50,11 @@ my_env=$2
 
 # Start conda
 source ${miniconda_loc}/etc/profile.d/conda.sh
+
+# Accept terms of service for channels
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
 conda activate base
 
 # Build environment from cached .yaml
